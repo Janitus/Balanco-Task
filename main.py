@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
-GOOGLE_SHEET_EMAIL = os.getenv("GOOGLE_SHEET_EMAIL")
+GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
 CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE", "credentials.json")
 
 SCOPES = [
@@ -34,13 +34,8 @@ def write_to_sheet(movies):
     creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
     client = gspread.authorize(creds)
 
-    spreadsheet = client.create("Ruotsin top 10 elokuvat")
-
-    if GOOGLE_SHEET_EMAIL:
-        spreadsheet.share(GOOGLE_SHEET_EMAIL, perm_type="user", role="writer")
-
+    spreadsheet = client.open_by_key(GOOGLE_SHEET_ID)
     sheet = spreadsheet.sheet1
-    sheet.update_title("Top 10")
 
     headers = ["#", "Elokuva", "Julkaisupäivä", "Suosio", "Arvosana", "Äänimäärä"]
     rows = [headers]
@@ -72,7 +67,7 @@ def write_to_sheet(movies):
     sheet.format("A14:B14", {"textFormat": {"bold": True}})
     sheet.format("A17:B17", {"textFormat": {"bold": True}})
 
-    print(f"Taulukko luotu: {spreadsheet.url}")
+    print(f"Taulukko päivitetty: {spreadsheet.url}")
     return spreadsheet.url
 
 
